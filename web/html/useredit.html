@@ -1,0 +1,33 @@
+<h1>{{EDIT_USER}}</h1>
+{{SAVE_MSG}}
+Permission:
+<form action="index.php?action=useredit&id={{EDIT_USER_ID}}" method="POST">
+	<select name="permission">
+		<option value="0" {{SELECT_0}}>Normal &nbsp;</option>
+		<option value="1" {{SELECT_1}}>Explicit denied &nbsp;</option>
+		<option value="2" {{SELECT_2}}>Explicit allowed &nbsp;</option>
+	</select>
+	<input type="submit" value="Save" name="submitPermi" />
+</form>
+
+<br />
+<br />
+
+Change password:
+<form action="index.php?action=useredit&id={{EDIT_USER_ID}}" method="POST">
+	<table>
+		<tr class="no_hover"> 
+			<td>New password</td>
+			<td><input type="password" name="pin1" id="pin1" maxlength="{{MAX_PW_LENGTH}}" size="{{MAX_PW_LENGTH}}" class="input" /></td>
+		</tr>
+		<tr class="no_hover"> 
+			<td>Repeat new password</td>
+			<td><input type="password" name ="pin2" id="pin2" maxlength="{{MAX_PW_LENGTH}}" size="{{MAX_PW_LENGTH}}" class="input" /></td>
+		</tr>
+	</table>
+	<input type="submit" value="Change PIN" name="submitPassword" />
+</form>
+<br />
+<br />
+
+{{EXTERNEDIT}}

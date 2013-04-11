@@ -1,0 +1,43 @@
+# Dataprovides (DB-Engine) (Keep this unless you know what you are doing!)
+dataProvider=Mysql
+
+# MySQL Settings
+mysql_host=localhost
+mysql_username=
+mysql_password=
+mysql_database=smschallenge
+
+# LDAP Settings
+ldap_server=
+ldap_port=389
+ldap_bind_username=
+ldap_bind_password=
+ldap_base_dn=
+
+# where to look for groups
+base_ou_for_groups= 
+# all the groups comma seperated
+groups_to_sync=
+
+
+# Which attributes should be fetched
+ldap_schema_user=cn,sn,givenname,telephonenumber,department,manager,mobile,mail,employeeid,language,extensionattribute7,wwwhomepage,title,streetaddress,physicaldeliveryofficename,extensionattribute2,postalcode,l
+
+### LOG CONF ###
+log_type=file,syslog, mysql
+log_file=log/log.txt
+date_format=d-m-Y H:i:s
+log_error=1
+log_warning=1
+log_info=1
+log_debug=1
+syslog_prefix=smschallenge_sync:
+
+### WEB CONF ###
+web_admins=
+default_password=123456
+# kerberos or internal
+auth_type=internal
+min_password_length=6
+# make sure this is the same as in the config of the module!
+max_password_length=16

@@ -1,0 +1,52 @@
+# smschallenge module
+smschallenge{
+
+	# MySQL information
+	mysql_username = "smschallenge"
+	mysql_password = "password"
+	mysql_host = "localhost"
+	mysql_database = "smschallenge"
+
+	# Message to user
+	challenge_string = "Enter SMS-Code!"
+
+	# Can be either mailx or gammu, depends on what you are using.
+	# If using AT it connects directly to your serial_port (modem_port)
+	#send_method = "mailx"
+	#send_method = "gammu"
+	send_method = "at"
+
+	# Fallback, if the main send_method fails, you can set here another
+	# send method, which will be used if the first one fails. Notice:
+	# all the according information for that send_method (like email_gw)
+	# has to be given, otherwise, it just ignores it
+	send_method_fallback = "mailx"
+
+	# If using mailx we _need_ a mail-gateway (phonenumber@your-mail-gateway.com)
+	send_email_gw = "your-mail-gateway.com"
+
+	# If using at we _need_ a modem (/dev/tty...)
+	modem_port = "/dev/ttyxx"
+
+	# If using at we _can_ set a sms-class. Class 0
+	# is flash-sms, Class 1 is a normal sms. Default
+	# if no value is given: 1
+	sms_class = 1
+
+	# The acs-server which are accepted, to make sure, not every request
+	# which the freeradius server is processing goes trough this module
+	# and maybe causes strange sms-commands
+	#acs_server = "xxx.xxx.xxx.xxx"
+	#acs_server2 = "xxx.xxx.xxx.xxx"
+	#acs_server3 = "xxx.xxx.xxx.xxx"
+	#acs_server4 = "xxx.xxx.xxx.xxx"
+
+	# Security aspect, enter the maximum length of your user/pw so no mysql-
+	# query gets to long. Extra chars are dropped.
+	account_length = 20
+	vpn_prefix = ""
+	min_password_length = 6
+	max_password_length = 12
+	code_blocks = 2
+
+}

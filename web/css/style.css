@@ -1,0 +1,543 @@
+/**
+ * Copyright (C) 2013 Luginbühl Timon, Müller Lukas, Swisscom AG
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * For more informations see the license file or see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Basic CSS-File.
+ * 
+ */
+
+/* Remove every padding and margin, and set default fontcolor and fontfamily */
+*{
+	margin: 0;
+	padding: 0;
+	font-family: Helvetica,Sans-Serif;
+	color: #111;
+}
+
+body, html{
+
+}
+
+html{
+	height:100%;
+	background-color:#DDDDEE;
+}
+
+/* Body */
+body{
+	padding-top: 20px;
+	background-image: -moz-linear-gradient(center top , #AAAAAA, #DDDDEE);
+	
+}
+
+/* Set basic settings for all links */
+a{
+	color:#1AD;
+	text-decoration:none;
+}
+
+/* Basic settings for all headings */
+h1, h2, h3, h4, h5, h6, h7{
+	margin:15px 0 15px 0;
+	font-weight:normal;
+}
+
+/* Basic settings for all paragraphs */
+p, pre{
+	margin:12px 0 12px 4px;
+}
+
+/* breakings, give it a margin */
+br{
+	margin:5px 0;
+}
+
+pre{
+	margin:0;
+	padding:0;
+}
+
+/* List styling */
+.sc_list{
+	list-style-type: none;
+	margin:0 0 0 4px;
+}
+
+/* Main div */
+#page{
+	margin: 0 auto 20px auto;
+	min-width: 800px;
+	max-width:1200px;
+	height: auto;
+	background:#fff;
+	box-shadow:0 0 0.3em #1C7DD2;
+}
+
+/* ============ H E A D E R ============ */
+#header {
+	min-width: 796px;
+	background-color: #FFFFFF;
+}
+
+#headerTop {
+	min-width: 796px;
+	height: 120px;
+	padding: 10px;
+	background-color: #FFFFFF;
+	background-image: url(../images/logo2.png);
+	background-size: 170px 120px;
+	background-repeat: no-repeat;
+	background-position: right;
+	vertical-align: middle;
+}
+
+#webName {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 80px;
+	z-index: 0;
+	position: relative;
+	top:38%;
+	right: 5px;
+	font-size: 25px;
+	vertical-align: middle;
+	display: block;
+}
+
+#webName span{
+	text-shadow: 1px 1px 1px #9CDCFF;
+}
+
+/* ============ N A V I G A T I O N ============ */
+nav {
+	margin:20px 0 3px;
+	box-shadow:0 0 3px 0 #AAAAAA;
+	background:#EFEFEF;
+	min-width: 796px;
+	height: 35px;
+	font-size: 16px;
+}
+
+nav ul {
+	margin-left: 15px;
+}
+
+nav ul li a {
+	margin:0 2px;
+	padding:7px 8px 0 8px;
+	height: 35px;
+	display: block;
+	text-decoration: none;
+	text-align: center;
+	list-style-type: none;
+	outline-style:none;
+}
+
+nav span {
+	position: relative;
+}
+
+nav a:hover, nav a:focus, nav a:active, nav li.active a {
+	color: #777;
+}
+
+nav a {
+	color: #111;
+}
+
+nav li {
+	display: block;
+	float: left;
+	height: 35px;
+}
+
+nav li.active{
+	-moz-box-shadow: inset -3px 0px 1px -1px #BFBFBF, inset 3px 0px 1px -1px #BFBFBF;
+	-webkit-box-shadow: inset -3px 0px 1px -1px #BFBFBF, inset 3px 0px 1px -1px #BFBFBF;
+	box-shadow: inset -4px 0px 2px -2px #BFBFBF, inset 4px 0px 2px -2px #BFBFBF;
+	background:#EAEAEA;
+}
+
+/*============ J S - E R R O R ============*/
+.js_error{
+	width:800px;
+	height:25px;
+	margin:0;
+	padding:4px 0;
+	margin:0 auto;
+	text-align:center;
+	background:#b70e1c;
+	border-radius:0.4em 0.4em 0em 0em;
+	-moz-border-radius:0.4em 0.4em 0em 0em;
+	-webkit-border-radius:0.4em 0.4em 0em 0em;
+	-khtml-border-radius:0.4em 0.4em 0em 0em;
+	-o-border-radius:0.4em 0.4em 0em 0em;
+}
+
+.js_error p{
+	font-size:16px;
+	font-weight:bold;
+	color:#fff;
+	margin:0;
+	padding:0;
+}
+
+
+/*============ C O N T E N T - S T Y L I N G ============*/
+.container > .container {
+	padding:15px;
+	min-width: 766px;
+	height: auto;
+	font-size: 12px;
+	background-color: #FFF;	
+}
+
+#content, #fancybox-content {
+	margin: auto;
+	min-width: auto;
+	padding: 0px;
+	text-align: left;
+	font-size: 12px;
+	word-wrap: break-word;
+}
+
+.breadcrumbs a, .breadcrumbs span{
+
+}
+
+.breadcrumbs{
+	height:20px;
+}
+
+/* ============ F O O T E R ============*/
+
+footer {
+	min-width: 800px;
+	height: 45px;
+	color:#fff;
+	background-color:#004582;
+}
+
+#leftFooter {
+	margin: 0px;
+	position: static;
+	float: left;
+	width: 429px;
+	height: 45px;
+	background-size: 429px 45px;
+}
+
+#rightFooter {
+	margin: 0px;
+	height: 45px;
+	width: auto;
+	padding:13px;
+}
+
+#rightFooter span{
+	margin: 0px 10px;
+	position: relative;
+	/*float: right;*/
+	display:block;
+	text-align: right;
+	font-size: 12px;
+	color:#fff;
+}
+
+#rightFooter a {
+	color: #1AF;
+	text-decoration: none;
+}
+
+/* ============ F L A S H - M E S S A G E S - S T Y L I N G ============*/
+
+div.flash-error, div.flash-notice, div.flash-success, div.information{
+	padding:.8em;
+	margin-bottom:1em;
+	border:2px solid #ddd;
+}
+
+div.flash-error{
+	background:#FBE3E4;
+	color:#8a1f11;
+	border-color:#FBC2C4;
+}
+
+div.flash-notice{
+	background:#FFF6BF;
+	color:#514721;
+	border-color:#FFD324;
+}
+
+div.flash-success, div.information, div.information b, div.information p, div.information li{
+	background:#E6EFC2;
+	color:#264409;
+	border-color:#C6D880;
+}
+
+div.information ul{
+	margin-left:4px;
+}
+
+div.flash-error a{
+	color:#8a1f11;
+}
+
+div.flash-notice a{
+	color:#514721;
+}
+
+div.flash-success a, div.information a{
+	color:#264409;
+}
+
+div.error{
+	background:#FBE3E4;
+	color:#8a1f11;
+	border: 2px solid #FBC2C4;
+	padding:0 0 0 15px;
+}
+
+div.error pre{
+	color:#8a1f11;
+}
+
+
+/* ============ T A B L E - S T Y L I N G ============*/
+table {
+	border-collapse:collapse;
+	width: auto;
+	max-width:1200px;
+	padding:0;
+	background:#fff;
+	border-collapse: collapse;
+	border: none;
+}
+
+table input:not([type=button]), table select, table textarea {
+	width: 100%;
+	border: 1px solid lightgray;
+}
+
+table input[type=checkbox] {
+	width: 10px;
+}
+
+table input:focus, table textarea:focus, table select:focus{
+	border: 1px solid lightgray;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) inset, 0 0 12px rgba(82, 168, 236, 0.6);
+}
+
+table{
+	border: 1px solid lightgray;
+}
+
+table.items {
+	border:none;
+	border-top: 1px solid lightgray;
+	border-bottom: 1px solid lightgray;
+}
+
+td{
+	padding:6px;
+	-ms-word-break: break-all;
+	word-break: break-all;
+	word-break: break-word;
+	-webkit-hyphens: auto;
+	-moz-hyphens: auto;
+	hyphens: auto;
+	/*word-wrap: break-word;
+	
+	-webkit-hyphens: auto; 
+	-moz-hyphens: auto;
+	hyphens: auto;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap; */
+}
+
+thead {
+	background: #efefef;
+}
+
+thead tr:first-child {
+	border-top:1px solid lightgray;
+}
+
+thead tr:last-child {
+	border-bottom:1px solid lightgray;
+}
+
+thead th, thead th label {
+	background: #efefef;
+	color:#111;
+	padding:6px;
+	text-align: center;
+}
+
+thead a {
+	color: #015;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+thead th a:hover{
+	color: #777;
+}
+
+
+tbody {
+	margin-top:5px;
+}
+
+tbody tr.odd{
+	background: #ffffff;
+}
+
+tbody tr:not(.odd) {
+	background: #efefef;
+}
+
+tbody tr.even{
+	background: #efefef;
+}
+
+tbody tr:hover td a{
+	color:#fff;
+}
+
+tbody tr.selected {
+	background: #77ccff;
+}
+
+tbody tr:hover {
+	background: #11aaff;
+}
+
+tbody tr.no_hover:hover {
+	background: #efefef;
+}
+
+tbody tr.itemDelete{
+	background-color:#d12;
+}
+
+table.table_padding{
+	margin-right: 30px;
+	margin-bottom: 30px;
+}
+
+tbody tr.accept{
+	background:#E6EFC2;
+}
+
+tbody tr.reject{
+	background:#FBE3E4;
+}
+
+/* ============ B U T T O N - S T Y L I N G ============*/
+.deleteButton, .addButton, .downloadButton{
+	background:transparent;
+	background-image:url('../images/add.png');
+	border:none;
+	width:25px;
+	height:25px;
+	display:block;
+	cursor:pointer;
+}
+
+.deleteButton{
+	background-image:url('../images/delete.png');
+}
+
+.downloadButton{
+	background-image:url('../images/detail_25.png');
+}
+
+
+.email{
+	border:1px solid #000;
+	border-top:none;
+	padding:20px;
+	width:726px;
+}
+
+input [type=submit], input [type=button]{
+	padding: 4px;
+}
+
+.log_messages{
+	width:1140px;
+	height:400px;
+	overflow-y:scroll;
+	padding:15px;
+	border:1px solid lightgrey;
+}
+
+.log_messages pre{
+	font-family: Consolas,monospace;
+	color:#000;
+}
+
+.center{
+	margin-left: 	auto;
+	margin-right:	auto;
+}
+
+.text_center{
+	text-align:	center;
+}
+
+/* ============ D A T A - T A B L E -  S T Y L I NG ============*/
+
+thead th {
+	cursor: pointer;
+	* cursor: hand;
+}
+
+.sorting_asc {
+	background: url('../images/sort_asc.png') no-repeat center right;
+}
+
+.sorting_desc {
+	background: url('../images/sort_desc.png') no-repeat center right;
+}
+
+.sorting {
+	background: url('../images/sort_both.png') no-repeat center right;
+}
+
+.sorting_asc_disabled {
+	background: url('./images/sort_asc_disabled.png') no-repeat center right;
+}
+
+.sorting_desc_disabled {
+	background: url('../images/sort_desc_disabled.png') no-repeat center right;
+}
+
+.dataTables_filter{
+	margin-bottom: 5px;	
+}
+
+/* ============ T A B L E -  S T Y L I NG ============*/
+
+#logtable{
+	width: 800px;
+	max-width: 800px;
+}
+
+#logtable td{
+	max-width: 200px;
+}

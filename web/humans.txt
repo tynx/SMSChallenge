@@ -1,0 +1,17 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Tim Luginbühl, Swisscom AG -- PL/Programmer -- timon.luginbuehl@swisscom.com
+    Lukas Müller, Swisscom AG -- Programmer -- lukas.mueller4@swisscom.com
+
+# THANKS
+
+    Swisscom AG
+    Logo Design: Markus Maibach
+
+# TECHNOLOGY COLOPHON
+
+    HTML5, CSS3, PHP 5, C
+    jQuery

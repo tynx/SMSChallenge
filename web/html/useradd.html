@@ -1,0 +1,50 @@
+<h1>add new User</h1>
+
+{{SAVE_MSG}}
+
+<p>User:
+<form action="index.php?action=useradd" method="POST">
+	<table>
+		<thead>
+			<tr>
+				<th>Username*</th>
+				<th>surName*</th>
+				<th>givenName*</th>
+				<th>E-Mail</th>
+				<th>mobile*</th>
+				<th>Notes</th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr class = "no_hover">
+			<td> <input type="text" 	name="username" 	value="{{val_username}}"	id="username" 	maxlength="1024"	class="input" /> </td>
+			<td> <input type="text" 	name="surName"		value="{{val_surName}}"		id="surName" 	maxlength="1024" 	class="input" /> </td>
+			<td> <input type="text" 	name="givenName"	value="{{val_givenName}}"	id="givenName" 	maxlength="1024" 	class="input" /> </td>
+			<td> <input type="email"	name="email"		value="{{val_email}}"		id="email"		maxlength="1024"	class="input" /> </td>
+			<td> <input type="tel"		name="mobile" 		value="{{val_tel}}"			id="mobile" 	maxlength="1024" 	class="input" /> </td>
+			<td> <input type="text"		name="Notes"		value="{{val_notes}}"		id="Notes" 		maxlength="2048" 	class="input" /> </td>
+		</tr>
+		</tbody>
+	</table>
+	<br />
+	<input type="submit" value="add user" name="submitext" />
+</form>
+</p>
+<br />
+
+<p>LDAP-User:
+<form action="index.php?action=useradd" method="POST">
+	<table>
+		<thead>	<tr> <th>Username</th> </tr> </thead>
+		<tbody>
+			<tr class = "no_hover">
+			<td>
+				<input type="text" name="NTAccount" id="NTAccount" maxlength="" size="" class="input" />
+			</td>
+		</tr>
+		</tbody>
+	</table>
+	<br />
+	<input type="submit" value="sync user" name="submitint" />
+</form>
+</p>

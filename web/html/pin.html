@@ -1,0 +1,27 @@
+<div class="text_center">
+	<h1>{{USERNAME}}</h1>
+
+	<div class="information text_center center">
+		<p><b>Information:</b></p>
+		<p>The password should be as secure as possible.</p>
+	</div>
+	
+	{{SAVE_MSG}}
+	
+	<form action="index.php?action=pin" method="POST">
+		<table class="center">
+			<tr class="no_hover"> 
+				<td>New password</td>
+				<td><input type="password" name="pin1" id="pin1" maxlength="{{MAX_PW_LENGTH}}" size="{{MAX_PW_LENGTH}}" class="input" /></td>
+			</tr>
+			<tr class="no_hover"> 
+				<td>Repeat new password</td>
+				<td><input type="password" name ="pin2" id="pin2" maxlength="{{MAX_PW_LENGTH}}" size="{{MAX_PW_LENGTH}}" class="input" /></td>
+			</tr>
+		</table>
+		<p><input type="submit" value="Change PIN" name="submit" /></p>
+	</form>
+	<p> <h2>Your recent account usage and log entries:</h2>	</p>
+</div>
+
+{{USER_LOG}}

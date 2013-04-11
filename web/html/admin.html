@@ -1,0 +1,11 @@
+<div class="text_center center">
+	<h1>Admin</h1>
+	{{SAVE_MSG}}
+	<a href="index.php?action=useradd"><button>Add new user</button></a>
+	<br />
+	<br />
+	<form name="deleteform" id="deleteform" action="index.php?action=userdelete" method="POST">	
+		{{USER_TABLE}}
+		<input type="hidden" id="userid" name="userid" value="" />
+	</form>
+</div>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="./css/style.css" media="screen, projection" />
+		<meta http-equiv="X-UA-Compatible" content="IE=7,IE=8,IE=9" >
+		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />	
+		<script type="text/javascript" src="./js/jquery-1.9.1.js"></script>
+		<script type="text/javascript" src="./js/functions.js"></script>
+		<script type="text/javascript" src="./js/jquery.dataTables.js"></script> 
+		<title>{{NAME}}</title>
+	</head>
+
+	<body onload="" id="body">
+		<noscript>
+			<div class="js_error">
+				<p>This page will only work properly if you enable Javascript or use a modern browser!</p>
+			</div>
+		</noscript>
+		<div class="container" id="page">
+			<header>
+				<div id="headerTop">
+					<div id="webName">
+						<span>{{NAME}} - {{SITE}}</span>
+					</div>
+				</div>
+				<nav>
+					<ul>{{NAVIGATION}}</ul>
+				</nav>
+			</header>
+			<div class="container">
+				<div id="content">
+					{{CONTENT}}
+				</div>
+			</div>
+			<footer>
+				<div id="leftFooter"></div>
+				<div id="rightFooter">
+					<span>SMSChallenge</span>
+				</div>
+			</footer>
+		</div>
+	</body>
+</html>
