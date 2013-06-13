@@ -262,6 +262,8 @@ After you checked everything, SMSChallenge is ready to go!
 ##Setup SMSChallenge on a raspberry pi with the provided image
 
 Go to github.com/tynx/SMSChallenge and download the .img.
+
+[Download the image.](http://bit.ly/13GwJdy)
 Copy the image to the SD-Card (with dd)
 
 I recommend that you run raspi-config and change the configuration.
@@ -432,4 +434,5 @@ Copyright (C) 2013 Luginbühl Timon, Müller Lukas, Swisscom AG
 
 For more detail see the [license file](license.txt) or see [http://www.gnu.org/licenses](http://www.gnu.org/licenses).
 
+[http://www.gnu.org/licenses](http://www.gnu.org/licenses).
 
