@@ -29,7 +29,7 @@ CREATE TABLE `smschallenge`.`user`(
   `password` VARCHAR(40) DEFAULT NULL,
   `code` VARCHAR(1024) DEFAULT NULL,
   `Notes` varchar(2048) DEFAULT NULL,
-  `salt`  varchar(6) DEFAULT NULL;
+  `salt`  varchar(6) DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARACTER SET UTF8
   COLLATE utf8_general_ci;

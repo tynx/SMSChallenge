@@ -768,7 +768,7 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 		return ret_val;
 	}
 
-	msleep(10000);
+	msleep(100);
 
 	/* get the answer*/
 	get_answer(&res, &loggedin);
