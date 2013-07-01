@@ -156,7 +156,7 @@ class Mysql{
 			if($i>0)
 				$sql .= 'AND ';
 			$sql .= '`' . $query->getTable() . '`.`' . $key . '` = ';
-			$sql .= (is_numeric($value) ) ? $value : '\'' . $value . '\' ';
+			$sql .= (is_numeric($value) && preg_match('/^([0-9\.,-]+)$/', $value)) ? $value : '\'' . $value . '\' ';
 			$i++;
 		}
 		return $sql;
@@ -230,7 +230,7 @@ class Mysql{
 			if($i>0){
 				$sql .= ', ';
 			}
-			if(is_numeric($value)){
+			if(is_numeric($value) && preg_match('/^([0-9\.,-]+)$/', $value)){
 				$sql .= $value;
 			}else{
 				$sql .= '\'' . mysql_real_escape_string($value) . '\'';
@@ -265,7 +265,7 @@ class Mysql{
 				$sql .= ', ';
 			}
 			$sql .= '`' . $query->getTable() . '`.`' . $column . '` = ';
-			if(is_numeric($value)){
+			if(is_numeric($value) && preg_match('/^([0-9\.,-]+)$/', $value)){
 				$sql .= $value;
 			}else{
 				$sql .= '\'' . mysql_real_escape_string($value) . '\'';
@@ -315,7 +315,7 @@ class Mysql{
 			if($i>0){
 				$sql .= ', ';
 			}
-			if(is_numeric($parameter)){
+			if(is_numeric($parameter) && preg_match('/^([0-9\.,-]+)$/', $parameter) ){
 				$sql .= $parameter;
 			}else{
 				$sql .= '\'' . mysql_real_escape_string($parameter) . '\'';
