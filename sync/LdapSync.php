@@ -122,7 +122,7 @@ Class LdapSync{
 		
 		// Update the boolean synced, and the lastSynced
 		$u->synced = true;
-		$u->lastSynced=time();
+		$u->lastSynced=date("Y-m-d H:i:s", time());
 		
 		// Save it
 		if( $u->save() !== false ){
