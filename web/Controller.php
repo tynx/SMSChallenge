@@ -218,7 +218,7 @@ class Controller{
 		foreach($logs as $log){
 			// add an row for every log the the array which holds the informations for the table
 			$td_arr = array();
-			if($log->id_user){
+			if(isset($log->id_user) && $log->id_user){
 				$user = User::model()->findByPk($log->id_user);
 				$td_arr[] = $log->id_user . '( ' .$user->username . ')';
 			}else{
