@@ -665,8 +665,8 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 	char username[inst->account_length];
 	char password[inst->max_password_length];
 	/* Prevents SQL-Injection when using following vars (will be escaped) */
-	char username_escaped[(2 * strlen(username))+1];
-	char password_escaped[(2 * strlen(password))+1];
+	char username_escaped[(2 * inst->account_length)+1];
+	char code_escaped[(2 * (inst->code_blocks*4+1))+1];
 
 	if (strlen(request->username->vp_strvalue) < inst->account_length ) {
 		strncpy( username, request->username->vp_strvalue, strlen(request->username->vp_strvalue) +1);
@@ -1058,8 +1058,8 @@ static int smschallenge_authenticate(void *instance, REQUEST *request){
 	char username[inst->account_length];
 	char code[inst->code_blocks*4+1];
 	/* Prevent SQL-Injection when using following vars (will be escaped) */
-	char username_escaped[(2 * strlen(username))+1];
-	char code_escaped[(2 * strlen(code))+1];
+	char username_escaped[(2 * inst->account_length)+1];
+	char code_escaped[(2 * (inst->code_blocks*4+1))+1];
 
 	/* Prevent buffer overflow through long user/code-pw */
 	if (strlen(request->username->vp_strvalue) < inst->account_length ) {
