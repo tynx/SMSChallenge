@@ -2,23 +2,34 @@
 
 Welcome to SMSChallenge
 ---
-SMSChallenge is a service, which provides a 2 step authentication including a challenge via SMS.
+SMSChallenge is a service which provides a 2 step authentication including a challenge via SMS.
+
+The initial use for this project was for VPN User authentication via a free radius server.
+A user connects to the VPN, enters a username + PIN, then receives a password vis SMS/Text, which is then entered in a second step into the VPN authentication. So the User needs to know his username and have his phone available (two factors).
+
+User details can be pulled from Active Directory (LDAP), SMS are sent via email or an USB modem.
+The whole server can be run on a Raspberry PI!
+
 SMSChallenge is distributed under the GNU General Public License - see chapter [License](#License) for more details. 
  
 Architecture / Design
 ---
-First step of the authentication is a normal login with a username and a password. Usernames for VPN can be distincted by a prefix. If this login was successful, the SMSChallenge-module sends a challenge(one-time-token) in form of an sms. This challenge has to be entered into the VPN client. This is the second authentication step.
-MySQL is used for storing the users and their passwords. The SMSChallenge-module is a simple plugin for one of the biggest RADIUS-Server (Freeradius).
-Users can be synced against an AD-Group via LDAP(done in PHP). This feature minimizes the effort of an administrator to keep track of VPN-Users which should (not) have acceess. Don't worry if you don't use AD/LDAP, you can work with normal SMSChallenge-internal accounts.
-A simple WebGUI written in PHP allows administrators to manage the VPN-Users and their access.
-An even simpler CLI provides a bashy way of managing users. (Not very complete at this stage of the project).
+* First step of the authentication is a normal login with a username and a password. Usernames for VPN can be distincted by a prefix. 
+* If this login was successful, the SMSChallenge-module sends a challenge(one-time-token) in form of an sms. This challenge has to be entered into the VPN client. This is the second authentication step.
+
+* MySQL is used for storing the users and their passwords. The SMSChallenge-module is a simple plugin for one of the biggest RADIUS-Server (Freeradius).
+
+* Users can be synchronised against an Active Directory (AD) Group via LDAP (done in PHP). This feature minimizes the effort of an administrator to keep track of VPN-Users which should (not) have acceess. Don't worry if you don't use AD/LDAP, you can work with normal SMSChallenge-internal accounts.
+
+* A simple WebGUI written in PHP allows administrators to manage the VPN-Users and their access.
+* An even simpler CLI provides a bashy way of managing users. (Not very complete at this stage of the project).
 
 Installation
 ---
 
 Clone the project into /opt. (Recommended, but feel free to drop it somewhere else)
 
-Also install following packages out of your repository.
+Also install following packages from your OS repository
 
 - bsd-mailx OR/AND gnokii-cli (depends on what you use, see "Chapter" [config](#config) of the module)
 - libmysqlclient-dev
