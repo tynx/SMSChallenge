@@ -30,7 +30,7 @@ Class LdapSync{
 		$users = User::model()->findAll();
 		$ldap = Ldap::getInstance();
 		$ldap->setSchema('user');
-		
+
 		// Find all user from ldap which belong to the department.
 		//$group_users = $this->getUsersOfGroup($group);
 
@@ -38,26 +38,26 @@ Class LdapSync{
 		
 
 		foreach($group_users as $user){
-			
+
 			$info = $ldap->search($user);
 			$info = $info[0];
-			
-			
+
+
 			if($ldap->isValidUser($info)){
 				// Create/Update the user
 				$u = User::model()->findByAttributes(array('username'=>$info['cn']));
 				// We want to create a new user, if he does not exist
 				if($u==null)
 					$u = New User();
-				
+
 				// Populate the object with the new values
 				$u->populate($u->remap($info));
-				
+
 				// Update the boolean synced, and the lastSynced
 				$u->synced = true;
 				$u->lastSynced=date("Y-m-d H:i:s", time());
 				$u->permissionStatus = 0;
-				
+
 				// Save it
 				if( $u->save() !== false ){
 					$successfulUsers++;
@@ -69,16 +69,15 @@ Class LdapSync{
 						}
 					}
 				}
-				
 			}
 		}
-		
+
 		if(count($users)==0){
 			$l = new Logger();
 			$l->info('Successfully synced ' . $successfulUsers . ' users. No old users in the DB.');
 			return;
 		}
-		
+
 		$oldUsers=0;
 		// Sync the users which are not yet synced
 		foreach($users as $user){
@@ -90,43 +89,57 @@ Class LdapSync{
 				$oldUsers++;
 				continue;
 			}
-			
+
 			$user->populate($user->remap($info[0]));
 			$user->synced = true;
 			$user->lastSynced=date("Y-m-d H:i:s", time());
 			$user->save();
 			$successfulUsers++;
 		}
-		
+
 		$l = new Logger();
 		$l->info('Successfully synced ' . $successfulUsers . ' users. There are ' . $oldUsers . ' users which were not synced');
 
 	}
-	
-	public function syncUser($user){
-		
+
+	/**
+	 * This functions syncs a single user via the LDAP.
+	 * If the user already exists in the DB the information will be updated.
+	 * Otherwise a new user will be created.
+	 *
+	 * @param: 
+	 * $username: The username of the user you want to sync.
+	 * @return: true or false on error
+	 * 
+	 */
+	public function syncUser($username){
 		$l = new Logger();
 		$ldap = Ldap::getInstance();
 		$ldap->setSchema('user');
-		$info = $ldap->search('cn=' . $user);
-		
+		// search via username
+		$info = $ldap->search('cn=' . $username);
+
+		// if error or if not exactly one user was found return false
 		if(count($info)!=1 || $info == false)
 			return false;
+
+		// get user by username
 		$u = User::model()->findByAttributes(array('username'=>$info[0]['cn']));
+
 		// We want to create a new user, if he does not exist
 		if($u==null)
 			$u = New User();
-		
+
 		// Populate the object with the new values
 		$u->populate($u->remap($info[0]));
-		
+
 		// Update the boolean synced, and the lastSynced
 		$u->synced = true;
 		$u->lastSynced=date("Y-m-d H:i:s", time());
-		
+
 		// Save it
 		if( $u->save() !== false ){
-			$l->info('User ' . $user . ' was added/updated successfully.');
+			$l->info('User ' . $u->username . ' was added/updated successfully.');
 			return true;
 		}
 		return false;
@@ -156,7 +169,7 @@ Class LdapSync{
 				$users[] = $cn;
 			}
 		}
-		
+
 		return $users;
 	}
 

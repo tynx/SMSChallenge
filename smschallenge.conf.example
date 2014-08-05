@@ -36,8 +36,10 @@ syslog_prefix=smschallenge_sync:
 ### WEB CONF ###
 web_admins=
 default_password=123456
+
 # kerberos or internal
 auth_type=internal
-min_password_length=6
+
 # make sure this is the same as in the config of the module!
+min_password_length=6
 max_password_length=16

@@ -39,7 +39,7 @@ CREATE TABLE `smschallenge`.`log` (
   `id_user` INT NULL,
   `host` VARCHAR(30) DEFAULT NULL,
   `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `priority` ENUM('debug', 'info','error','critical') DEFAULT 'info',
+  `priority` ENUM('debug', 'info','warning','error','critical') DEFAULT 'info',
   `message` varchar(1024) DEFAULT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARACTER SET UTF8

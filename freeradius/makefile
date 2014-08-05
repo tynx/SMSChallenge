@@ -16,7 +16,7 @@ CONFFILE = $(ETCPATH)modules/smschallenge
 #CFLAGS = -Wall -I/usr/include  -DNDEBUG
 CFLAGS = -Wall -I/usr/include 
 
-LIBS =	-lc -L /usr/lib/mysql/ -l mysqlclient
+LIBS =	-lc -L /usr/lib/mysql/ -l mysqlclient -l curl
 
 ALL:	rlm_smschallenge.o rlm_smschallenge-$(VERS).so
 	if [ ! -e ./smschallenge ]; then cp smschallenge.sample smschallenge ; fi

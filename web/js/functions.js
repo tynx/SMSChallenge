@@ -14,6 +14,7 @@ $(document).ready(function(){
 		"bLengthChange": false,
 		"bAutoWidth": false,
 		"bFilter": true,
+		"bStateSave": true,
 		"aaSorting":[],
 		 "aoColumnDefs": [ { "bSortable": false, "aTargets": [8,9,10 ] } ],    
 	} );
@@ -25,6 +26,7 @@ $(document).ready(function(){
 		"bLengthChange": false,
 		"bInfo": false,
 		"bAutoWidth": false,
+		"bStateSave": true,
 		"bFilter": true,
 		"aaSorting":[],
 	} );
