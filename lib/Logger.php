@@ -130,13 +130,13 @@ class Logger{
 				$msg .= ' (User: ' . $user . ')';
 			
 			if($level == 'error')
-				syslog(LOG_ERR, $this->syslog_prefix . ' ' . $msg);
+				syslog(LOG_ERR, $this->syslog_prefix . ' ' .  strtoupper($level) .' '. $msg);
 			if($level == 'warning')
-				syslog(LOG_WARNING, $this->syslog_prefix . ' ' . $msg);
+				syslog(LOG_WARNING, $this->syslog_prefix . ' ' . strtoupper($level) .  ' ' . $msg);
 			if($level == 'info')
-				syslog(LOG_INFO, $this->syslog_prefix . ' ' . $msg);
+				syslog(LOG_INFO, $this->syslog_prefix . ' ' . strtoupper($level) . ' ' . $msg);
 			if($level == 'debug')
-				syslog(LOG_DEBUG, $this->syslog_prefix . ' ' . $msg);
+				syslog(LOG_DEBUG, $this->syslog_prefix . ' ' . strtoupper($level) . ' ' . $msg);
 		}
 		// For logging into mysql
 		if(in_array('mysql', $this->log_types)){

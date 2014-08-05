@@ -15,7 +15,7 @@
  * For more informations see the license file or see <http://www.gnu.org/licenses/>.
  */
  
-// JUST FOR DEV!
+// JUST FOR DEVELOPMENT, DEBUGGING AND TESTING PURPOSES!
 error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 

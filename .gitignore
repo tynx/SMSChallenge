@@ -1,0 +1,6 @@
+freeradius/*.so
+freeradius/*.o
+freeradius/smschallenge
+smschallenge.conf
+log/*
+

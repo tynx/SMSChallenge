@@ -70,6 +70,13 @@ pre{
 	padding:0;
 }
 
+/*remove the strange border in IE*/
+img{
+	border-color: white;
+	border-width: 0px;
+	border-style: none;
+}
+
 /* List styling */
 .sc_list{
 	list-style-type: none;

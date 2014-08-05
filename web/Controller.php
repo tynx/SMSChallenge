@@ -187,9 +187,9 @@ class Controller{
 				$row[] = date('H:i:s d.m.Y', strtotime($user->lastChange));
 			}
 
-			$row[]  =  $user->permissionStatusString();
-			$row[]  = '<a href="index.php?action=userview&id=' . $user->id . '"><img src="./images/detail_16.png" /></a>';
-			$row[]  = '<a href="index.php?action=useredit&id=' . $user->id . '"><img src="./images/edit_16.png" /></a>';
+			$row[] =  $user->permissionStatusString();
+			$row[] = '<a href="index.php?action=userview&id=' . $user->id . '"><img src="./images/detail_16.png" /></a>';
+			$row[] = '<a href="index.php?action=useredit&id=' . $user->id . '"><img src="./images/edit_16.png" /></a>';
 			$user_string  = $user->surName . ' ' . $user->givenName . ', ' . $user->department . ' (' . $user->username . ')';
 			$row[]  = '<a href="#" onclick="deleteUser(this, ' . $user->id . ', \'' . $user_string . '\')"><img src="./images/cancel_16.png" /></a>';
 			// add the row to the array which holds the informations for the table
@@ -261,7 +261,7 @@ class Controller{
 		if(isset($_POST['submitPassword'])){
 			$message = $this->changePassword($user);
 			$l = new Logger();
-			$l->info( $user->username . ' password set by Admin');
+			$l->info( $user->username . ' password set by Admin ('.$_SESSION['user']['username'].')');
 		// save Permission changes
 		}elseif(isset($_POST['submitPermi'])){
 			$permission = (int)$_POST['permission'];
@@ -270,7 +270,7 @@ class Controller{
 				$user->save();
 				$message = '<div class="flash-success">Successsfully updated user.</div>';
 				$l = new Logger();
-				$l->info( $user->username . '\'s permission modified by Admin');
+				$l->info( $user->username . '\'s permission modified by Admin('.$_SESSION['user']['username'].')');
 
 			}
 		// save user information changes
@@ -320,7 +320,7 @@ class Controller{
 				$user->save();
 				$message = '<div class="flash-success">Successsfully changed user ' . $surname . ' ' . $givenname . ' : ' . $username . '</div>';
 				$l = new Logger();
-				$l->info( $user->username . ' modified by Admin');
+				$l->info( $user->username . ' modified by Admin('.$_SESSION['user']['username'].')');
 			}
 		}
 
@@ -333,7 +333,7 @@ class Controller{
 			$editExtern = str_replace($srch, $rplc, $editExtern);
 		}
 
-		//build page
+		// build page
 		$content = $this->html->getPage('useredit');
 		$user_string = $user->givenName . ' ' . $user->surName . ' (' . $user->username . ')';
 		$search = array('{{EDIT_USER}}', '{{EDIT_USER_ID}}', '{{SAVE_MSG}}', '{{EXTERNEDIT}}', '{{MAX_PW_LENGTH}}');
@@ -423,7 +423,7 @@ class Controller{
 		if($user->delete()){
 			$message = '<div class="flash-success">Successsfully deleted user.</div>';
 			$l = new Logger();
-			$l->info($username . ' removed by Admin');
+			$l->info($username . ' removed by Admin('.$_SESSION['user']['username'].')');
 		}else{
 			$this->actionError('Error while deleting User.');
 		}
@@ -512,7 +512,7 @@ class Controller{
 
 			if(preg_match("/^[a-zA-Z0-9]+$/", $NTAccount) != 1) {
 				// if the account name is invalid, set an error message
-				$message = '<div class="flash-error">Invalid username.</div>';
+				$message .= '<div class="flash-error">Invalid username.</div>';
 			}else{
 				// search user in LDAP
 				$arg = 'cn=' .$NTAccount;
@@ -521,20 +521,27 @@ class Controller{
 					// if the user is a valid LDAP user remap the fetched informations
 					$ret = User::model()->remap($ldap_array[0]);
 
+					if(!array_key_exists('mobileNumber', $ret)){
+						// no mobile
+						$message .= '<div class="flash-notice"> This user has no mobile Number set in the AD and therefore can not login!</div>';
+					}
+
 					if( ($existingUser = User::model()->findByAttributes(array('username' => $NTAccount ))) != NULL){
 						// the user already exists so update him
 						$ret['id'] = $existingUser->id;
 						$user->populate($ret);
 						$user->save();
 						$l = new Logger();
-						$l->info($user->username . ' updated by Admin');
+						$l->info($user->username . ' updated by Admin('.$_SESSION['user']['username'].')' );
 						$message = '<div class="flash-notice"> User already exists.</div>';
 					}else{
 						// new user so add him
 						$user->populate($ret);
+						$user->synced = true;
+						$user->lastSynced=date("Y-m-d H:i:s", time());
 						$user->save();
 						$l = new Logger();
-						$l->info($user->username . ' added by Admin');
+						$l->info($user->username . ' added by Admin('.$_SESSION['user']['username'].')' );
 						$message .= '<div class="flash-success"><p>Successsfully added user ' . $ret["givenName"] . ' ' . $ret["surName"] .', ' . $ret["username"] . ' : ' . $ret["department"]. '</p><p>Please set an initial password for this user</p></div>';
 						$this->actionUserEdit($user->id, $message);
 						return;
@@ -570,9 +577,6 @@ class Controller{
 		$v = new Validator();
 		$pin1 = trim((int)$_POST['pin1']);
 		$pin2 = trim((int)$_POST['pin2']);
-		
-		//$min_password_length
-		//$max_password_length
 
 		if(!$v->isNumber($pin1, $min_password_length, $max_password_length)){
 			$message = '<div class="flash-error">Invalid password! 

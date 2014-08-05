@@ -25,6 +25,12 @@
  * After that the query is run and given back. Also this class handles
  * the whole connection to the MySQL-Server. The needed information for
  * that are taken out of the config directly.
+ * 
+ * Notice that scientific notation of floats aren't recognized as floats!
+ * Because the salt can look like an scientific notation of a number, 
+ * this was causing troubles and is now blocked!
+ * 
+ * 
  */
 class Mysql{
 
@@ -315,11 +321,7 @@ class Mysql{
 			if($i>0){
 				$sql .= ', ';
 			}
-			if(is_numeric($parameter) && preg_match('/^([0-9\.,-]+)$/', $parameter) ){
-				$sql .= $parameter;
-			}else{
-				$sql .= '\'' . mysql_real_escape_string($parameter) . '\'';
-			}
+			$sql .= '\'' . mysql_real_escape_string($parameter) . '\'';
 			$i++;
 		}
 		$sql .= ') AS `return_value`;';

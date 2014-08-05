@@ -26,7 +26,7 @@ CREATE FUNCTION `smschallenge`.`base_login` (username VARCHAR(1024), password VA
       SELECT `user` . `permissionStatus` INTO `permission` FROM `user` WHERE `user` . `username` = `username`;
       -- if denied, directly return 0
       IF permission = 1 THEN
-        SELECT set_log( `username`, 'info', 'base_login(): This user is denied to log in.') INTO log_result;
+        SELECT set_log( `username`, 'warning', 'base_login(): This user is denied to log in.') INTO log_result;
         RETURN 0;
       -- if explicit allowed directly return 1
       ELSEIF permission = 2 THEN
@@ -39,7 +39,7 @@ CREATE FUNCTION `smschallenge`.`base_login` (username VARCHAR(1024), password VA
           RETURN 1;
         -- if the user is not synced return 0
         ELSE
-          SELECT set_log( `username`, 'info', 'base_login(): This user is not synced.') INTO log_result;
+          SELECT set_log( `username`, 'warning', 'base_login(): This user is not synced.') INTO log_result;
           RETURN 0;
         END IF;
       END IF;
@@ -47,19 +47,22 @@ CREATE FUNCTION `smschallenge`.`base_login` (username VARCHAR(1024), password VA
       -- if the user doesn't exist or has given a wrong password check what failed
       SELECT COUNT(*) INTO `existing` FROM `user` WHERE `user`.`username` = `username`;
       IF existing = 0 THEN
-        SELECT set_log( `username`, 'info', 'base_login(): This user is not in the Database.') INTO log_result;
+        SELECT set_log( `username`, 'warning', 'base_login(): This user is not in the Database.') INTO log_result;
+        RETURN 0;
       END IF;
       SELECT COUNT(*) INTO not_active FROM `user` WHERE `user`.`username` = `username` AND `user`.`password` IS NULL;
       IF not_active = 1 THEN
-        SELECT set_log( `username`, 'info', 'base_login(): This users account is not active. He has to set his password first.') INTO log_result;
+        SELECT set_log( `username`, 'warning', 'base_login(): This users account is not active. He has to set his password first.') INTO log_result;
+        RETURN 0;
       END IF;
       -- read out the salt
       SELECT `user` . `salt` INTO `salt`  FROM `user` WHERE `user`.`username` = `username`;
       SELECT COUNT(*) INTO wrong_pw FROM `user` WHERE `user` . `username` = `username` AND `user` . `password` != sha1(CONCAT(sha1(CONCAT(sha1(CONCAT(sha1(CONCAT(sha1(CONCAT(`password`, `salt`)), `salt`)), `salt`)), `salt`)) , `salt`)) ;
       IF wrong_pw = 1 THEN
-        SELECT set_log( `username`, 'info', 'base_login(): This user has entered a wrong password.') INTO log_result;
+        SELECT set_log( `username`, 'warning', 'base_login(): This user has entered a wrong password.') INTO log_result;
+        RETURN 0;
       END IF;
-      SELECT set_log( `username`, 'info', 'base_login(): Something went wrong.') INTO log_result;
+      SELECT set_log( `username`, 'error', 'base_login(): Something went wrong.') INTO log_result;
     END IF;
   RETURN 0;
 END $$
@@ -94,8 +97,6 @@ CREATE FUNCTION `smschallenge`.`check_password` (username VARCHAR(1024), passwor
 
 DELIMITER ;
 
--- END UNDER CONSTRUCTION
-
 -- This functions checks the entered code which should be the same as the saved before
 -- return 0=codelogin failed 	return 1= codelogin correct
 
@@ -114,11 +115,11 @@ CREATE FUNCTION `smschallenge`.`code_login` (username VARCHAR(1024), code VARCHA
     -- user has typed the right code, log this and set loggedin to true
     IF counted = 1 THEN
       UPDATE `user` SET `lastLogin` = NOW() WHERE `user`.`username` = `username` AND `user`.`code` = `code`;
-      SELECT set_log( `username`, 'info', 'code_login(): This users logged in successfully.') INTO log_result;
+      SELECT set_log( `username`, 'info', 'code_login(): This user logged in successfully.') INTO log_result;
       SET loggedin = 1;
     ELSE
     -- user entered a wrong code, log this
-      SELECT set_log( `username`, 'info', 'code_login(): The given SMS-Code seems to be incorrect.') INTO log_result;
+      SELECT set_log( `username`, 'warning', 'code_login(): The given SMS-Code seems to be incorrect.') INTO log_result;
     END IF;
     RETURN loggedin;
   END $$
@@ -147,7 +148,7 @@ CREATE FUNCTION `smschallenge`.`set_code` ( username VARCHAR(1024), code VARCHAR
       SET returnValue = 1;
     -- something went wrong --> log this
     ELSE
-      SELECT set_log( `username`, 'err', 'set_code(): The new code couldnt be saved in the DB.') INTO log_result;
+      SELECT set_log( `username`, 'error', 'set_code(): The new code couldnt be saved in the DB.') INTO log_result;
     END IF;
     RETURN returnValue;
   END $$
@@ -185,7 +186,7 @@ CREATE FUNCTION `smschallenge`.`get_phone_number` ( username VARCHAR(1024) )
       RETURN phone;
     -- no valid phonenumber found
    ELSE
-      SELECT set_log( `username`, 'err', 'get_phone_number(): There was no valid phonenumber found.') INTO log_result;
+      SELECT set_log( `username`, 'error', 'get_phone_number(): There was no valid phonenumber found.') INTO log_result;
       RETURN '';
     END IF;
   END $$
@@ -219,7 +220,7 @@ CREATE FUNCTION `smschallenge`.`set_password` ( username VARCHAR(1024), password
       SET returnValue = 1;
     -- something went wrong, log this
     ELSE
-      SELECT set_log( `username`, 'err', 'set_code(): The new password couldnt be saved in the DB.') INTO log_result;
+      SELECT set_log( `username`, 'error', 'set_code(): The new password couldnt be saved in the DB.') INTO log_result;
     END IF;
     RETURN returnValue;
   END $$
@@ -233,23 +234,15 @@ DELIMITER $$
 CREATE FUNCTION `smschallenge`.`set_log` ( username VARCHAR(1024), priority VARCHAR(1024), what VARCHAR(1024) )
   RETURNS TINYINT(1) DETERMINISTIC
   BEGIN
-    DECLARE prio VARCHAR(4);
+    DECLARE prio VARCHAR(8);
     DECLARE temp_val VARCHAR(2);
     DECLARE id_user INT(11) DEFAULT 0; 
     SET prio = "info";
     SET username = LOWER(username);
-    SET temp_val = LOCATE( priority, 'err' );
-    IF temp_val = 1 THEN
-      SET prio = "err";
-    END IF;
-    SET temp_val = LOCATE( priority, 'crit' );
-    IF temp_val = 1 THEN
-      SET prio = "crit";
-    END IF;
     -- get userid
     SELECT `user`.`id` INTO id_user FROM `user` WHERE `user` . `username` = `username`;
     -- set log
-    INSERT INTO `log` (`id_user`, `host`, `time`, `priority`, `message`) VALUES( id_user, substring_index(user(), '@', -1),  NOW(), prio, what);
+    INSERT INTO `log` (`id_user`, `host`, `time`, `priority`, `message`) VALUES( id_user, substring_index(user(), '@', -1),  NOW(), priority, what);
   RETURN 0;
   END $$
 
