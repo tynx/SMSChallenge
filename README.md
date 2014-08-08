@@ -4,10 +4,10 @@ Welcome to SMSChallenge
 ---
 SMSChallenge is a service which provides a 2 step authentication including a challenge via SMS.
 
-The initial use for this project was for VPN User authentication via a free radius server.
-A user connects to the VPN, enters a username + PIN, then receives a password vis SMS/Text, which is then entered in a second step into the VPN authentication. So the User needs to know his username and have his phone available (two factors).
+The initial use for this project was for VPN user authentication via a freeradius server.
+A user connects to the VPN, enters a username + PIN, then receives a password vis SMS/Text, which is then entered in a second step into the VPN authentication. So the user needs to know his username and have his phone available (two factors).
 
-User details can be pulled from Active Directory (LDAP), SMS are sent via email or an USB modem.
+User details can be pulled from Active Directory (LDAP), SMS are sent via email, USB modem or SOAP.
 The whole server can be run on a Raspberry PI!
 
 SMSChallenge is distributed under the GNU General Public License - see chapter [License](#License) for more details. 
@@ -15,11 +15,11 @@ SMSChallenge is distributed under the GNU General Public License - see chapter [
 Architecture / Design
 ---
 * First step of the authentication is a normal login with a username and a password. Usernames for VPN can be distincted by a prefix. 
-* If this login was successful, the SMSChallenge-module sends a challenge(one-time-token) in form of an sms. This challenge has to be entered into the VPN client. This is the second authentication step.
+* If this login was successful, the SMSChallenge module sends a challenge (one-time-token) in form of an sms. This challenge has to be entered into the VPN client. This is the second authentication step.
 
 * MySQL is used for storing the users and their passwords. The SMSChallenge-module is a simple plugin for one of the biggest RADIUS-Server (Freeradius).
 
-* Users can be synchronised against an Active Directory (AD) Group via LDAP (done in PHP). This feature minimizes the effort of an administrator to keep track of VPN-Users which should (not) have acceess. Don't worry if you don't use AD/LDAP, you can work with normal SMSChallenge-internal accounts.
+* Users can be synchronised against an Active Directory (AD) Group via LDAP (done in PHP). This feature minimizes the effort of an administrator to keep track of VPN-Users which should (not) have acceess. ** Don't worry if you don't use AD/LDAP, you can work with normal SMSChallenge-internal accounts. **
 
 * A simple WebGUI written in PHP allows administrators to manage the VPN-Users and their access.
 * An even simpler CLI provides a bashy way of managing users. (Not very complete at this stage of the project).
@@ -44,21 +44,21 @@ Then create the database and functions:
 mysql -u user -p < mysql_install.sql
 mysql -u user -p < MySQLFunctions
 ```
-It may be a good idea to make a separate mysql-user just for smschallenge.
+It may be a good idea to create a separate mysql-user just for smschallenge.
 
 ----
 
-Create the config for CLI/Web/Sync (the c-module is unaffected by these settings):
+Create the config for CLI/Web/Sync (the c-module is unaffected by these settings):  
 You can either store the config in the lib directory (where the config-loader is located) or /etc. (/etc is recommended).
 ```
 cp smschallenge.conf.example /etc/smschallenge.conf
 ```
 Some notes to the different settings:
 
-- LDAP-Settings can be empty in case the syncing against the AD/LDAP is not used. Otherwise provide an LDAP-Account that has enough permissions to read out the users of a OU (Group).
-  - Also what is needed for LDAP (or not if you don't use AD/LDAP) are the configs: base_ou_for_groups, groups_to_sync, ldap_schema_user
+- LDAP-Settings can be empty in case the syncing against the AD/LDAP is not used. Otherwise provide a LDAP-Account that has enough permissions to read out the users of an OU (Group).
+  - The following configs are also required if you want to use AD/LDAP: base_ou_for_groups, groups_to_sync, ldap_schema_user
 - There are 3 types of logging possible: file, mysql, syslog
-  - They can be combinated (comma seperated)
+  - They can be combined (comma seperated)
   - All the settings in the category "LOG" apply for all types except: syslog_prefix and log_file
 - auth_type is for the kind of authentication used for the WebGUI. In case you sync your users against AD/LDAP you may wanna use "mod_kerb_auth" for apache. Then set the auth_type to "kerberos". The other possibility is to use internal, which authenticates agains the mysql-table "user".
 - password_length(min/max) is for setting the min/max length for the passwords which can be set via the GUI
@@ -78,7 +78,7 @@ Create the first (admin) user WITH LDAP:
 php -e sync/sync.php syncuser [[YOUR USERNAME]]
 ```
 
-Add the user to the admins (in conf file)! 
+Add the user to the admins (in the config file)! 
 
 
 ---
@@ -105,7 +105,7 @@ This is basically done with a single entry in the crontab:
 ```
 ---
 
-Freeradius (installing it is up to you)
+Freeradius (installing it is up to you):
 This section is all about the directory "smschallenge/freeradius"
 Compile the module.
 ```
@@ -151,12 +151,12 @@ Start freeradius in debug mode to see details about the module/plugin:
 
 Installation on Raspberry PI
 ---
-##Complete Installation Process SMSChallenge on an Raspberry PI:
+##Complete Installation Process SMSChallenge on a Raspberry PI:
 
-First of all download the raspbian image.
-Go to http://raspberrypi.org/downloads/ and download the latest raspbian image.
+First of all, download the raspbian image.
+Go to [http://raspberrypi.org/downloads/](http://raspberrypi.org/downloads/) and download the latest raspbian image.
 
-When it's done copy the image to the SD-Card. (the tool dd is probably the simplest)
+When it's done, copy the image to the SD-Card. (the tool dd is probably the simplest)
 
 This will take some minutes. After it's done insert the SD-Card to the PI and boot it.
 Now the raspi-config should be displayed.
@@ -205,21 +205,7 @@ hostname -F /etc/hostname
 For the next step (installing the needed packages) make sure you got an internet-connection.
 
 ```
-sudo -s
-apt-get udpate
-apt-get install mysql-server-5.5
-apt-get install apache2
-apt-get install php5
-apt-get install php5-ldap
-apt-get install php5-mysql
-apt-get install freeradius
-apt-get install libfreeradius-dev
-apt-get install gnokii
-apt-get install git
-apt-get install usb-modeswitch
-apt-get install cu
-apt-get upgrade
-apt-get install mailx
+sudo apt-get update && sudo apt-get install mysql-server-5.5 apache2 php5 php5-ldap php5-mysql php5-cli freeradius libfreeradius-dev gnokii git usb-modeswitch cu libmysqlclient-dev subversion bsd-mailx libcurl4-openssl-dev
 ```
 
 Now pull SMSChallenge:
@@ -245,7 +231,7 @@ cp  smschallenge.conf.example /etc/smschallenge.conf
 nano /etc/smschallenge.conf
 ```
 
-If u want to use an modem to send the sms go to the chapter modem installation.
+If you want to use an modem to send the sms go to the chapter [modem installation](#modem-installation).
 
 Now let's compile the freeradius modules.
 Go to smschallenge/freeradius/
@@ -256,12 +242,12 @@ sudo make
 sudo make install
 ```
 
-Create an Link in /var/www/ and check the permission of the web folder. 
+Create a link in /var/www/ and check the permission of the web folder. 
 ```
 ln -s /opt/smschallenge/web/ /var/www/web
 ```
 
-Last but no least write the cronjob to automate the snycing of the users. (If you use ldap sync)
+Last but no least, write the cronjob to automate the snycing of the users (If you use LDAP sync).
 ```
 crontab -e
 0 0 * * * /bin/bash php -e /opt/smschallenge/sync/sync.php sync
@@ -270,17 +256,16 @@ crontab -e
 After you checked everything, SMSChallenge is ready to go!
 
 
-##Setup SMSChallenge on a raspberry pi with the provided image
+##Setup SMSChallenge on a Raspberry PI with the provided image
 
 Go to github.com/tynx/SMSChallenge and download the .img.
 
 [Download the image.](http://bit.ly/13GwJdy)
-Copy the image to the SD-Card (with dd)
+Copy the image to the SD-Card (with dd).
 
-I recommend that you run raspi-config and change the configuration.
-Expand the rootfilesystem
-Change the hostname in the following two file.
-If you don't set the domain apache will throw warning messages. ( hostname.domain)
+It's recommended to run raspi-config and change the configuration and expand the rootfilesystem.
+Then change the hostname in the following two files.
+If you don't set the domain apache will throw warning messages ( hostname.domain).
 
 ```
 nano /etc/hosts
@@ -292,7 +277,7 @@ hostname -F /etc/hostname
 An apt-get upgrade is recommended!
 
 It's recommend to change all the passwords.  ( again, the standart PW is: smschallenge)
-Notice: Don't forget to also change the password in the config files!
+Notice: Don't forget to change the password in the config files!
 ```
 sudo passwd root
 > your password
@@ -312,17 +297,17 @@ Now set your configuration:
 nano /etc/smschallenge.conf
 ```
 
-Now you Raspberry PI should be ready to go.
+Now, your Raspberry PI should be ready to go.
 
 Notice:
-If you want to use a modem to send the SMS you might see the chapter #modem installation
+If you want to use a modem to send the SMS you might see the chapter [modem installation](#modem-installation).
 
 
 
 ##modem installation
 
-This is an guideline to get the vodafone k3715 working, you need to change the vendor and product if u use another modem.
-First of all change the blacklist, comment out the blacklistet entries "blacklist spi-bcm2708" and "blacklist i2c-bcm2708"
+This is a guideline to get the vodafone k3715 working. You need to change the vendor and product if you use another modem.
+First of all, change the blacklist. Comment out the blacklisted entries "blacklist spi-bcm2708" and "blacklist i2c-bcm2708".
 
 ```
 nano /etc/modprobe.d/raspi-blacklist.conf 
@@ -363,7 +348,7 @@ Change the owner of ttyUSB0
 chown uucp /dev/ttyUSB0
 ```
 
-Last but not least test if the modem works. (sendsms.c, minicom or cu)
+Last but not least test if the modem works. (sendsms.c, sendsms_soap.c minicom or cu)
 
 
 #Send method: at
@@ -380,7 +365,7 @@ It may be that your serial connection is not set up properly by linux by default
 ```
 stty -F /dev/YOUR_DEVICE -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke -opost -onlcr -brkint -icrnl -imaxbel min 1 time 0 ispeed 9600 ospeed 9600
 ```
-Make sure you set these properties at startup if they're needed.
+Make sure you set these properties at startup if they're needed.  
 
 If you got issues, you can try to connect to the modem by hand and maybe you'll find the error.
 ```
@@ -428,11 +413,26 @@ serial_write_usleep = 10000
 smsc_timeout = 20
 ```
 
+#Send method: SOAP
+With this send method you can use a soap API.
+Make sure to set the url, user, password and request-body in the config file if you use this method.
+You may need to adapt the code to use it with your API. 
+
+There is also a small C-Programm to test this send method.
+
+```
+make sendsms_soap
+./sendsms_soap
+```
+
+The programm will prompt you for the needed configuration-parameters.
+
 #Send method: which one to take?
-At the beginning, we were using gnokii and with most modems it works very reliable. One issue we discovered over time: the speed. It does so much resetting and configuring before each sms, that it can be too slow for what we use it in this software. That's why we wrote a "native" version. And because our modems aren't 100% reliable we use a mail-to-sms gateway as fallback (via mailx)
+At the beginning, we were using gnokii and with most modems it worked very reliable. One issue we discovered over time: the speed. It does so much resetting and configuring before each sms, that it can be too slow for what we use it in this software. That's why we wrote a "native" version. And because our modems aren't 100% reliable we use a mail-to-sms gateway as fallback (via mailx).
+Later we switched to a soap API and as fallback we still use mailx.  
 
 #License
-Copyright (C) 2013 Luginbühl Timon, Müller Lukas, Swisscom AG
+Copyright (C) 2014 Luginbühl Timon, Müller Lukas, Swisscom AG
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by

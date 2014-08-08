@@ -30,6 +30,8 @@ install:	ALL
 	install rlm_smschallenge-$(VERS).so $(LIBPATH)
 	ln -fs rlm_smschallenge-$(VERS).so $(LIBPATH)rlm_smschallenge.so
 clean: 
-	rm *.o rlm_smschallenge*.so smschallenge sendsms
+	rm *.o rlm_smschallenge*.so smschallenge sendsms sendsms_soap
 sendsms:
 	cc -o sendsms sendsms.c
+sendsms_soap:
+	cc -o sendsms_soap sendsms_soap.c $(LIBS)

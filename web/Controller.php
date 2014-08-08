@@ -579,17 +579,25 @@ class Controller{
 		$pin2 = trim((int)$_POST['pin2']);
 
 		if(!$v->isNumber($pin1, $min_password_length, $max_password_length)){
-			$message = '<div class="flash-error">Invalid password! 
-						Password may only contain numbers and must be between '.
-						$min_password_length .' and '. $max_password_length .' digits long!
-						</div>';
+			$message = '<div class="flash-error">Invalid password!';
+
+			if($min_password_length == $max_password_length){
+				$message .= 'password must be exactly' . $max_password_length . 'digits long.';
+			}else{
+				$message .= 'Password must be between ' . $min_password_length. ' and ' .$max_password_length. ' digits long';
+			}
+			$message .= '</div>';
+
 		}elseif($pin1 == $pin2){
 			$user->password = $pin1;
 			$user->save();
 			$message = '<div class="flash-success">Successsfully changed password.</div>';
+			$l = new Logger();
+			$l->info( $user->username . ' changed his PIN');
 		}else{
-			$message = '<div class="flash-error">Password and retyped password are not the same</div>';
+			$message = '<div class="flash-error">Password and retyped password  are not the same</div>';
 		}
+
 		return $message;
 	}
 

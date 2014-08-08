@@ -28,11 +28,12 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <termios.h>
+#include <time.h>
 
 struct sms_content{
-        char    *phone_number;
-        char    *message;
-        int     sms_class;
+	char    *phone_number;
+	char    *message;
+	int     sms_class;
 };
 
 /* wrapper for nanosleep */
@@ -46,13 +47,13 @@ int __nsleep(const struct timespec *req, struct timespec *rem){
  
 /* usefull interface for a better implementation of sleep*/
 int msleep(unsigned long milisec){
-    struct timespec req={0},rem={0};
-    time_t sec=(int)(milisec/1000);
-    milisec=milisec-(sec*1000);
-    req.tv_sec=sec;
-    req.tv_nsec=milisec*1000000L;
-    __nsleep(&req,&rem);
-    return 1;
+	struct timespec req={0},rem={0};
+	time_t sec=(int)(milisec/1000);
+	milisec=milisec-(sec*1000);
+	req.tv_sec=sec;
+	req.tv_nsec=milisec*1000000L;
+	__nsleep(&req,&rem);
+	return 1;
 }
 
 int send_command(int fd, char* at_command, int timeout) {
