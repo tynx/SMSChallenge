@@ -98,7 +98,7 @@ class Commands{
 
 		$user->givenName = $this->readLine('GivenName');
 		$user->surName = $this->readLine('SurName');
-		$user->username = $this->readLine('Username', true, strtolower($user->givenName));
+		$user->username = strtoupper($this->readLine('Username', true, strtoupper($user->givenName)));
 		$user->email = $this->readLine('Email');
 		$user->mobileNumber = $this->readLine('mobileNumber');
 		$user->notes = $this->readLine('Notes', false);

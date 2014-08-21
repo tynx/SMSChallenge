@@ -29,8 +29,9 @@ RCSID("$Id$")
 #include <string.h>
 #include <termios.h>
 #include <stdarg.h>
+#include <curl/curl.h>
 
-/* If you don't get all informations in the request		if( strcmp(vpnprefix, prefix) != 0 ){ packet
+/* If you don't get all informations in the request
   delete following line or more likely change it to: #define NDEBUG */
 #undef NDEBUG
 
@@ -54,13 +55,22 @@ typedef struct rlm_smschallenge_t{
 	char	*modem_port;
 	int		sms_class;
 	char	*send_method_fallback;
+	char	*soap_url;
+	char	*soap_user;
+	char	*soap_password;
+	char	*soap_body;
 } rlm_smschallenge_t;
 
 /* Struct for saving needed information about an sms */
 struct sms_content{
 	char	*phone_number;
 	char	*message;
-	int	sms_class;
+	int		sms_class;
+};
+
+struct soap_response{
+	char	*ptr;
+	size_t	len;
 };
 
 /* Still configurations stuff... */
@@ -79,10 +89,14 @@ static const CONF_PARSER module_config[] = {
 	{ "account_length",			PW_TYPE_INTEGER,	offsetof(rlm_smschallenge_t,account_length),		NULL,	NULL},
 	{ "vpn_prefix",				PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,vpn_prefix),			NULL,	NULL},
 	{ "max_password_length",	PW_TYPE_INTEGER,	offsetof(rlm_smschallenge_t,max_password_length),	NULL,	NULL},
-	{ "code_blocks",			PW_TYPE_INTEGER,	offsetof(rlm_smschallenge_t,code_blocks),			NULL,	NULL},
+	{ "code_blocks",			PW_TYPE_INTEGER,	offsetof(rlm_smschallenge_t,code_blocks),			NULL,	NULL},  
 	{ "modem_port",				PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,modem_port),			NULL,	NULL},
 	{ "sms_class",				PW_TYPE_INTEGER,	offsetof(rlm_smschallenge_t,sms_class),				NULL,	"-1"},
 	{ "send_method_fallback",	PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,send_method_fallback),	NULL,	NULL},
+	{ "soap_url",				PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,soap_url),				NULL,	NULL},
+	{ "soap_user",				PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,soap_user),				NULL,	NULL},
+	{ "soap_password",			PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,soap_password),			NULL,	NULL},
+	{ "soap_body",				PW_TYPE_STRING_PTR,	offsetof(rlm_smschallenge_t,soap_body),				NULL,	NULL},
 	{ NULL, -1, 0, NULL, NULL }		/* end the list */
 };
 
@@ -140,11 +154,11 @@ void logger(int opt, int loglvl, REQUEST *request, char *msg, ...){
 	}
 	if(opt == 2 || opt == 3 || opt== 6 || opt == 7){
 		switch(loglvl){;
-			case 1: syslog(LOG_ERR, "%s",log_string);		break;
-			case 2: syslog(LOG_WARNING, "%s",log_string);	break;
-			case 3: syslog(LOG_INFO, "%s",log_string);		break;
-			case 4: syslog(LOG_DEBUG, "%s",log_string);		break;
-			default: syslog(LOG_WARNING, "%s",log_string);	break;
+			case 1: syslog(LOG_ERR, "ERROR: %s",log_string);		break;
+			case 2: syslog(LOG_WARNING, "WARNING: %s",log_string);	break;
+			case 3: syslog(LOG_INFO, "INFO: %s",log_string);		break;
+			case 4: syslog(LOG_DEBUG, "DEBUG %s",log_string);		break;
+			default: syslog(LOG_WARNING, "WARNING %s",log_string);	break;
 		}
 	}
 	if(opt == 4 || opt == 5 || opt == 6 || opt == 7){
@@ -241,15 +255,17 @@ char *getCode( int blocks_number) {
 	int i=0, j=0;
 
 	/* Set all values to zero */
-	for( i=0; i<blocks_number; i++ )
+	for( i=0; i<blocks_number; i++ ){
 		blocks[i] = 0;
+	}
 
 	/* open the urandom */
 	fp=fopen( "/dev/urandom", "r" );
 
 	/* small possibility, but if... */
-	if ( fp == NULL )
+	if ( fp == NULL ){
 		return "";
+	}
 
 	/* as many as needed */
 	for( i=0; i<(blocks_number*3); i++){
@@ -300,6 +316,100 @@ int send_sms_via_gammu(struct sms_content sms){
 	char command[1024] = "";
 	sprintf(command, "echo \"%s\" | gammu --sendsms TEXT %s", sms.message, sms.phone_number );
 	return system(command);
+}
+
+int soap_init_string(struct soap_response *s) {
+	s->len = 0;
+	s->ptr = malloc(s->len+1);
+	if(s->ptr == NULL){
+		fprintf(stderr, "malloc() failed\n");
+		return -1;
+	}
+	s->ptr[0] = '\0';
+	return 0;
+}
+
+size_t soap_writefunc(void *ptr, size_t size, size_t nmemb, struct soap_response *s){
+	size_t new_len = s->len + size*nmemb;
+	s->ptr = realloc(s->ptr, new_len+1);
+	if(s->ptr == NULL){
+		logger(7, 1, NULL, "realloc() failed in 'soap_writefunc'!");
+		return 1;
+	}
+	memcpy(s->ptr+s->len, ptr, size*nmemb);
+	s->ptr[new_len] = '\0';
+	s->len = new_len;
+
+	return size*nmemb;
+}
+
+int send_sms_via_soap(struct sms_content sms, rlm_smschallenge_t *inst){
+	int success = 0;
+	CURL *curl;
+	CURLcode res;
+	struct soap_response response;
+
+	if(inst->soap_url == NULL){
+		return -1;
+	}
+
+	if(inst->soap_user == NULL || inst->soap_password == NULL){
+		return -2;
+	}
+
+	
+	if(strlen(inst->soap_user)+strlen(inst->soap_password) > 1022){
+		return -3;
+	}
+
+	if(inst->soap_body == NULL || strlen(inst->soap_body) > 10235-(strlen(sms.phone_number)+strlen(sms.message))){
+		return -4;
+	}
+
+	char authentication[1024] = "";
+	char post_body[10240] = "";
+	char flash_sms[5] = "false";
+
+	sprintf(authentication, "%s:%s", inst->soap_user, inst->soap_password);
+
+
+	if(sms.sms_class ==0){
+		sprintf(flash_sms,"true");
+	}
+
+	sprintf(post_body, inst->soap_body, sms.phone_number, sms.message, flash_sms);
+
+	curl = curl_easy_init();
+	if(curl){
+		soap_init_string(&response);
+		curl_easy_setopt(curl, CURLOPT_URL, inst->soap_url);
+
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, soap_writefunc);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_USERPWD, authentication);
+
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);
+		/* Perform the request, res will get the return code */ 
+		res = curl_easy_perform(curl);
+		/* Check for errors */ 
+		if(res == CURLE_OK){
+			if(strstr(response.ptr, "OK") != NULL){
+				success = 1;
+			}
+		}else{
+			logger(7, 1, NULL, "curl_easy_perform() failed: %s", curl_easy_strerror(res));
+		}
+
+		/* always cleanup */
+		free(response.ptr);
+		curl_easy_cleanup(curl);
+	}
+	return (success == 1) ? 0 : -1;
 }
 
 int send_command(int fd, char* at_command, int timeout) {
@@ -407,8 +517,10 @@ int open_serial_device(char *device){
 	/* Replace the baud-rate */
 	cfsetispeed(&options, B9600);
 	cfsetospeed(&options, B9600);
+
 	/* Replace the hw flow control to _NO_ hw flow control */
 	options.c_cflag |= CRTSCTS;
+
 	/* Set the port to local otherwise control-characters will produce a hangup */
 	options.c_cflag |= CLOCAL;
 
@@ -500,8 +612,9 @@ int send_sms_via_at(struct sms_content sms, char *device){
 		ret = send_command(fd, "AT+CSCS=\"ASCII\"\r", timeout);
 		if(ret == -4 ){
 			/* ASCII is probably not supported, try GSM */
-                	if( send_command(fd, "AT+CSCS=\"GSM\"\r", timeout) != 0 )
-                        	fail = -7;
+			if( send_command(fd, "AT+CSCS=\"GSM\"\r", timeout) != 0 ){
+				fail = -7;
+			}
 		}else if(ret != 0){
 			fail = -7;
 		}
@@ -657,7 +770,7 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 	/* if user or pw is too long, we cut them to the according length
 	 * note that strnlen does NOT terminate extra long strings, hence the hack below..
 	 * does instead of
-	 * strncpy( password, request->password->vp_strvalue, inst->password_length +1 );
+	 * strncpy( password, request->password->vp_strvalue, inst->max_password_length +1 );
 	 * we do the checking below
 	 */
 
@@ -668,17 +781,17 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 	char username_escaped[(2 * inst->account_length)+1];
 	char password_escaped[(2 * (inst->code_blocks*4+1))+1];
 
-	if (strlen(request->username->vp_strvalue) < inst->account_length ) {
+	if(strlen(request->username->vp_strvalue) < inst->account_length ){
 		strncpy( username, request->username->vp_strvalue, strlen(request->username->vp_strvalue) +1);
-	} else {
+	}else{
 		strncpy( username, request->username->vp_strvalue, inst->account_length);
 		username[inst->account_length]='\0';
 		logger(1, 0, NULL, "Username too long: truncated to %d characters", inst->account_length);
 	}
 
-	if (strlen(request->password->vp_strvalue) <= inst->max_password_length ) {
+	if(strlen(request->password->vp_strvalue) <= inst->max_password_length ){
 		strncpy( password, request->password->vp_strvalue, strlen(request->password->vp_strvalue) +1);
-	} else {
+	}else{
 		strncpy( password, request->password->vp_strvalue, inst->max_password_length);
 		password[inst->max_password_length]='\0';
 		logger(1, 0, NULL, "Password too long: truncated to %d characters", inst->max_password_length);
@@ -826,14 +939,18 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 	if( inst->send_method == NULL || (
 		strcmp(inst->send_method, "at") != 0 &&
 		strcmp(inst->send_method, "gammu") != 0 &&
-		strcmp(inst->send_method, "mailx") != 0 )){
+		strcmp(inst->send_method, "mailx") != 0 && 
+		strcmp(inst->send_method, "soap") != 0
+		)){
 
 		logger(7, 1, request, "There was no valid send_method given. Going to use the fallback.");
 
 		if(inst->send_method_fallback == NULL || (
 		strcmp(inst->send_method_fallback, "at") != 0 &&
 		strcmp(inst->send_method_fallback, "gammu") != 0 &&
-		strcmp(inst->send_method_fallback, "mailx") != 0 )){
+		strcmp(inst->send_method_fallback, "mailx") != 0 &&
+		strcmp(inst->send_method_fallback, "soap") != 0 
+		)){
 			logger(7, 1, request, "There was no valid send_method_fallback given. Rejecting the user, we don't have any way to send sms.");
 			return RLM_MODULE_FAIL;
 		}else{
@@ -857,6 +974,14 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 	if( inst->modem_port == NULL && (strcmp(inst->send_method, "at") == 0 || strcmp(inst->send_method_fallback, "at") == 0) ){
 		logger(7, 1, request, "No modem-port was given. AT send_method is not working without an modem-port -> reject user");
 		return RLM_MODULE_FAIL;
+	}
+
+	/* if the send method (also the fallback) is SOAP, we need valid information */
+	if( inst->soap_user == NULL || inst->soap_password == NULL || inst->soap_body == NULL || inst->soap_url == NULL){
+		if(strcmp(inst->send_method, "soap") == 0 || strcmp(inst->send_method_fallback, "soap") == 0){
+			logger(7, 1, request, "Not all information for SOAP given. SOAP send_method is not working without all information -> reject user");
+			return RLM_MODULE_FAIL;
+		}
 	}
 
 	/* Check if we got a valid sms_class, otherwise use default => 1 */
@@ -932,6 +1057,18 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 		}
 	}
 
+	/* Send via soap */
+	if( strcmp( inst->send_method, "soap" ) == 0 ){
+		smsret = send_sms_via_soap(sms_info, inst);
+		/* Set log-messages, according to the return-value */
+		if( smsret == 0 ){
+			sms_sent = 1;
+			logger(7, 3, request, "SMS \"%s\" sent via SOAP to number %s", sms_info.message, sms_info.phone_number);
+		}else{
+			logger(7, 1, request, "(SOAP) Sending SMS \"%s\" to number %s failed! See previous logs for details.", sms_info.message, sms_info.phone_number);
+		}
+	}
+
 	/* Check if we got an valid fallback send_method */
 	if( inst->send_method_fallback != NULL && (
 		strcmp(inst->send_method_fallback, "at") == 0 ||
@@ -977,7 +1114,7 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 			}
 		}
 
-		/* If the sms was not send and the fallback is at, send it via mailx */
+		/* If the sms was not send and the fallback is mailx, send it via mailx */
 		if( strcmp( inst->send_method_fallback, "mailx" ) == 0 && sms_sent == 0 ){
 			smsret = send_sms_via_mailx(sms_info, inst->send_email_gw);
 			/* Set log-messages, according to the return-value */
@@ -988,6 +1125,19 @@ static int smschallenge_authorize(void *instance, REQUEST *request ){
 				logger(7, 1, request, "FALLBACK: (Mailx) Sending SMS \"%s\" to number %s failed!", sms_info.message, sms_info.phone_number);
 			}
 		}
+
+		/* If the sms was not send and the fallback is soap, send it via soap */
+		if( strcmp( inst->send_method_fallback, "soap" ) == 0 ){
+			smsret = send_sms_via_soap(sms_info, inst);
+			/* Set log-messages, according to the return-value */
+			if( smsret == 0 ){
+				sms_sent = 1;
+				logger(7, 3, request, "SMS \"%s\" sent via SOAP to number %s", sms_info.message, sms_info.phone_number);
+			}else{
+				logger(7, 1, request, "(SOAP) Sending SMS \"%s\" to number %s failed! See previous logs for details.", sms_info.message, sms_info.phone_number);
+			}
+		}
+
 	}else{
 		/* If we don't have a fallback, set a log */
 		logger(7, 1, request, "No valid send_method_fallback given. Fallback-mechanism was ignored." );
@@ -1104,6 +1254,7 @@ static int smschallenge_authenticate(void *instance, REQUEST *request){
 	logger(5, 0, request, "Challenge with password \"%s\" and username \"%s\"", code, username);
 
 	if((ret_val = establish_sql_connection(&conn, inst, request)) != 0){
+		mysql_close(conn);
 		return ret_val;
 	}
 

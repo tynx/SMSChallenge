@@ -40,6 +40,7 @@ default_password=123456
 # kerberos or internal
 auth_type=internal
 
-# make sure this is the same as in the config of the module!
-min_password_length=6
+# make sure this is the same as in the config of the freeradius-module!
 max_password_length=16
+min_password_length=6
+

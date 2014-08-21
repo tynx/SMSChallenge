@@ -1,6 +1,8 @@
 freeradius/*.so
 freeradius/*.o
 freeradius/smschallenge
+freeradius/sendsms_soap
+freeradius/sendsms
 smschallenge.conf
 log/*
 

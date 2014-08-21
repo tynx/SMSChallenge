@@ -426,7 +426,13 @@ tbody tr:hover td a{
 }
 
 tbody tr.selected {
-	background: #77ccff;
+	/* background: #77ccff; */
+	background: #11aaff;
+}
+
+.selected {
+	/* background: #77ccff; */
+	background: #11aaff;
 }
 
 tbody tr:hover {
@@ -548,3 +554,31 @@ thead th {
 #logtable td{
 	max-width: 200px;
 }
+
+.noLogin{
+	color:#FC000D;
+}
+
+
+/* hide the first column of the usertable*/
+#usertable tr th:first-child, #usertable tr td:first-child{
+	display: none;
+}
+
+#usertable_wrapper .dataTables_filter{
+	margin-bottom: 5px;
+	text-align: left;
+}
+
+#btnMultiple{
+	visibility: hidden;
+	width: 160px;
+	float:right;
+	margin-right: 10px;
+}
+
+#btnMultiple input{
+	width: 160px;
+	margin-bottom: 5px;
+}
+

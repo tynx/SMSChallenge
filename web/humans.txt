@@ -1,10 +1,14 @@
 # humanstxt.org/
 # The humans responsible & technology colophon
 
-# TEAM
+# CURRENT DEVELOPERS
 
-    Tim Luginbühl, Swisscom AG -- PL/Programmer -- timon.luginbuehl@swisscom.com
-    Lukas Müller, Swisscom AG -- Programmer -- lukas.mueller4@swisscom.com
+    Pauli Adrian, Swisscom AG -- Programmer -- Adrian.Pauli@swisscom.com
+    Lukas Müller, Swisscom AG -- Programmer --  github.com/wangibangi
+
+# FORMER DEVELOPER
+
+    Tim Luginbühl, former Swisscom AG -- Programmer -- github.com/tynx
 
 # THANKS
 

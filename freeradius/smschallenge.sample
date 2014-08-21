@@ -28,7 +28,7 @@ smschallenge{
 	# If using at we _need_ a modem (/dev/tty...)
 	modem_port = "/dev/ttyxx"
 
-	# If using at we _can_ set a sms-class. Class 0
+	# If using AT we _can_ set a sms-class. Class 0
 	# is flash-sms, Class 1 is a normal sms. Default
 	# if no value is given: 1
 	sms_class = 1
@@ -45,7 +45,15 @@ smschallenge{
 	# query gets to long. Extra chars are dropped.
 	account_length = 20
 	vpn_prefix = ""
+
 	max_password_length = 16
+	
+	# one code block contains 3 digits. So this number multiplied by 3 is the number of digits sent via sms.
 	code_blocks = 2
 
+	# the configuration parameters for the soap sms API.
+	soap_url = "https://host:port/path"
+	soap_user = "user"
+	soap_password = "pw"
+	soap_body = "soap-xml"
 }
