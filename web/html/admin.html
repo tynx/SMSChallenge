@@ -4,6 +4,19 @@
 	<a href="index.php?action=useradd"><button>Add new user</button></a>
 	<br />
 	<br />
+
+	<div id="btnMultiple">
+		<input type="button" id="btnMultipleDelete" value="delete selected users" onclick="deleteMultiple()" />
+		<input type="button" id="btnMultiplePermission" value="deny selected accounts" onclick="changeMultiple()" />
+	</div>
+
+
+	<br />
+
+	<form name="permissionform" id="permissionform" action="index.php?action=multiplePermission" method="POST">
+		<input type="hidden" id="useridPermi" name="userid" value="" />
+	</form>
+
 	<form name="deleteform" id="deleteform" action="index.php?action=userdelete" method="POST">	
 		{{USER_TABLE}}
 		<input type="hidden" id="userid" name="userid" value="" />

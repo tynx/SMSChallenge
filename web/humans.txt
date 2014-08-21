@@ -4,7 +4,7 @@
 # CURRENT DEVELOPERS
 
     Pauli Adrian, Swisscom AG -- Programmer -- Adrian.Pauli@swisscom.com
-    Lukas Müller, former Swisscom AG -- Programmer --  github.com/wangibangi
+    Lukas Müller, Swisscom AG -- Programmer --  github.com/wangibangi
 
 # FORMER DEVELOPER
 

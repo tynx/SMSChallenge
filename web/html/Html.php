@@ -156,7 +156,7 @@ class Html{
 				}
 				$table .= '</thead><tbody>';
 			}else{
-				$table .= ($i%2==0) ? '<tr class="even">' : '<tr class="odd">';
+				$table .= '<tr>';
 
 				foreach($row as $field ){
 					$table .= '<td>'. $field .'</td>';

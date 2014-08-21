@@ -76,8 +76,15 @@ class Controller{
 				}
 			}elseif($action == 'userdelete'){
 				if(isset($_POST['userid'])){
-					$id = (int)$_POST['userid'];
+					$id = $_POST['userid'];
 					$this->actionUserDelete($id);
+				}else{
+					$this->actionError('Missing paramaters.');
+				}
+			}elseif($action == 'multiplePermission'){
+				if(isset($_POST['userid'])){
+					$id = $_POST['userid'];
+					$this->actionMultipleDeny($id);
 				}else{
 					$this->actionError('Missing paramaters.');
 				}
@@ -156,19 +163,20 @@ class Controller{
 
 		// array which holds the data for the table, first row = tbl head
 		$tbl = array(
-				array('Username','Name', 'Department', '<div style="width:100px;">Mobile</div>',
+				array('UserID','Username','Name', 'Department', '<div style="width:100px;">Mobile</div>',
 				'<div style="width:120px;">Last synced</div>', '<div style="width:120px;">Last Login</div>',
-				'<div style="width:120px;">Last PW change</div>', '<div style="width:100px;">Permission</div>', '', '', '')
+				'<div style="width:120px;">Last PW change</div>', '<div style="width:60px;">synced</div>', '<div style="width:100px;">Permission</div>', '', '', '')
 		);
 
 		$i=0;
 		foreach($users as $user){
 			//create the row for the usr and add all columns to the row
 			$row = array();
+			$row[] = $user->id;
+
 			$row[] = $user->username;
 			$row[] = $user->surName . ' ' . $user->givenName;
 			$row[] = $user->department;
-
 			$row[] = $user->mobileNumber;
 
 			if(strtotime($user->lastSynced) < 0 || strtotime($user->lastSynced) === false){
@@ -187,7 +195,17 @@ class Controller{
 				$row[] = date('H:i:s d.m.Y', strtotime($user->lastChange));
 			}
 
-			$row[] =  $user->permissionStatusString();
+			//highlight the users which can't log in ( denied or not synced )
+			if(!$user->synced){
+				if($user->permissionStatus == 0)
+					$row[] = '<div class="noLogin">No</div>';
+				else
+					$row[] = 'no';
+			}else{
+				$row[] = 'yes';
+			}
+			$row[] = (($user->permissionStatus == 1) ? '<div class="noLogin">'.$user->permissionStatusString().'</div>' : $user->permissionStatusString());
+
 			$row[] = '<a href="index.php?action=userview&id=' . $user->id . '"><img src="./images/detail_16.png" /></a>';
 			$row[] = '<a href="index.php?action=useredit&id=' . $user->id . '"><img src="./images/edit_16.png" /></a>';
 			$user_string  = $user->surName . ' ' . $user->givenName . ', ' . $user->department . ' (' . $user->username . ')';
@@ -305,7 +323,7 @@ class Controller{
 					$message .= 'Mobilenumber not valid! <br />';
 			}
 			// display a message if the username is already in use
-			if($user->username != $username){
+			if(strtoupper($user->username) != $username){
 				if(User::model()->findByAttributes(array('username' => $username )))
 					$message .= 'Username already in use';
 			}
@@ -408,25 +426,33 @@ class Controller{
 	 * Function: actionUserDelete
 	 *
 	 * Description:
-	 * Deletes an user and set the according log.
+	 * Deletes an user (or multiple users) and set the according log.
 	 *
 	 * @param $id (int) The users id
 	 */
-	private function actionUserDelete($id){
-		$user = User::model()->findByPk($id);
-		if($user == null)
-			$this->actionError('User does not exist.');
+	private function actionUserDelete($users){
+		$ids = explode(';', $users);
 
-		$message ='';
-		$username = $user->username;
+		$message = '<div class="flash-notice">';
 
-		if($user->delete()){
-			$message = '<div class="flash-success">Successsfully deleted user.</div>';
-			$l = new Logger();
-			$l->info($username . ' removed by Admin('.$_SESSION['user']['username'].')');
-		}else{
-			$this->actionError('Error while deleting User.');
+		// loop trough all users 
+		foreach($ids as $id){
+			$user = User::model()->findByPk($id);
+			if($user == null)
+				$message .= 'User does not exist. Given id was:' . $id ;
+
+			$username = $user->username;
+
+			if($user->delete()){
+				$message .= 'Successsfully deleted user: ' . $username . ' <br />';
+				$l = new Logger();
+				$l->info($username . ' removed by Admin('.$_SESSION['user']['username'].')');
+			}else{
+				$message = 'Error while deleting User: ' . $username . '<br />';
+			}
 		}
+
+		$message .= '</div>';
 		$this->actionAdmin($message);
 	}
 
@@ -498,7 +524,7 @@ class Controller{
 			$user->populate($arg);
 			$user->save();
 			$l = new Logger();
-			$l->info($user->username . ' added by Admin');
+			$l->info($user->username . ' added by Admin('.$_SESSION['user']['username'].')');
 			$message = '<div style="max-width: 1200px; word-wrap: break-word;" class="flash-success"><p> Successsfully added user ' . $surname . ' ' . $givenname . ' : ' . $username . ' and set permission to explicit allowed. </p> <p>Please set an initial password for this user.</p> </div>';
 			$this->actionUserEdit($user->id, $message);
 			return;
@@ -575,14 +601,14 @@ class Controller{
 		$max_password_length = $conf->max_password_length;
 		$min_password_length = $conf->min_password_length;
 		$v = new Validator();
-		$pin1 = trim((int)$_POST['pin1']);
-		$pin2 = trim((int)$_POST['pin2']);
+		$pin1 = $_POST['pin1'];
+		$pin2 = $_POST['pin2'];
 
-		if(!$v->isNumber($pin1, $min_password_length, $max_password_length)){
+		if(!$v->isString($pin1, $min_password_length, $max_password_length)){
 			$message = '<div class="flash-error">Invalid password!';
 
 			if($min_password_length == $max_password_length){
-				$message .= 'password must be exactly' . $max_password_length . 'digits long.';
+				$message .= 'Password must be exactly' . $max_password_length . 'digits long.';
 			}else{
 				$message .= 'Password must be between ' . $min_password_length. ' and ' .$max_password_length. ' digits long';
 			}
@@ -599,6 +625,39 @@ class Controller{
 		}
 
 		return $message;
+	}
+
+	/**
+	 * Function: actionMultipleDeny
+	 * 
+	 * Description:
+	 * Sets multiple users to denied.
+	 * 
+	 * @param
+	 * $users (array) the users
+	 */
+	private function actionMultipleDeny($users){
+		$ids = explode(';', $users);
+
+		$message = '<div class="flash-notice">';
+
+		// loop trough all users 
+		foreach($ids as $id){
+			$user = User::model()->findByPk($id);
+			if($user == null)
+				$message .= 'User does not exist. Given id was:' . $id ;
+
+			$username = $user->username;
+
+			$user->permissionStatus = 1;
+			$user->save();
+			$message .= 'Successsfully updated user: ' . $user->username . '<br />';
+			$l = new Logger();
+			$l->info( $user->username . '\'s permission modified by Admin('.$_SESSION['user']['username'].')');
+		}
+
+		$message .= '</div>';
+		$this->actionAdmin($message);
 	}
 
 	/**
